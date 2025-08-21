@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">لوحة تحكم المدير</h1>
+</div>
+
+<!-- Key Metrics -->
+<div class="row">
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <h5 class="card-title">إجمالي المستخدمين</h5>
+                <p class="card-text fs-2" id="total-users">...</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <h5 class="card-title">إجمالي المعاملات</h5>
+                <p class="card-text fs-2" id="total-transactions">...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts -->
+<div class="row">
+    <div class="col-lg-7 mb-4">
+        <div class="card">
+            <div class="card-header">
+                المعاملات خلال آخر 30 يومًا
+            </div>
+            <div class="card-body">
+                <canvas id="transactionsOverTimeChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5 mb-4">
+        <div class="card">
+            <div class="card-header">
+                حجم التداول حسب العملة
+            </div>
+            <div class="card-body">
+                <canvas id="volumeByCurrencyChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Management Links -->
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">إدارة العملات</h5>
+                <p class="card-text">إضافة، تعديل، أو حذف العملات.</p>
+                <a href="{{ url_for('manage_currencies') }}" class="btn btn-outline-primary">الانتقال</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">إدارة أسعار الصرف</h5>
+                <p class="card-text">تحديد أسعار الصرف بين العملات.</p>
+                <a href="{{ url_for('manage_rates') }}" class="btn btn-outline-primary">الانتقال</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">إعدادات التطبيق</h5>
+                <p class="card-text">إدارة الإعدادات العامة للتطبيق.</p>
+                <a href="{{ url_for('manage_settings') }}" class="btn btn-outline-primary">الانتقال</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Fetch and display key metrics
+    fetch('/api/admin/stats/key_metrics')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('total-users').textContent = data.total_users;
+            document.getElementById('total-transactions').textContent = data.total_transactions;
+        });
+
+    // Transactions over time chart (Line)
+    fetch('/api/admin/stats/transactions_over_time')
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('transactionsOverTimeChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'عدد المعاملات',
+                        data: data.values,
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+
+    // Volume by currency chart (Doughnut)
+    fetch('/api/admin/stats/volume_by_currency')
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('volumeByCurrencyChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'حجم التداول',
+                        data: data.values,
+                        backgroundColor: [
+                            'rgb(255, 99, 132)',
+                            'rgb(54, 162, 235)',
+                            'rgb(255, 205, 86)',
+                            'rgb(75, 192, 192)',
+                            'rgb(153, 102, 255)',
+                            'rgb(255, 159, 64)'
+                        ],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                }
+            });
+        });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .hero-section {
+        padding: 6rem 0;
+        background-color: #e9ecef;
+        text-align: center;
+    }
+    .calculator-card {
+        background-color: white;
+        padding: 2rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        margin-top: -4rem;
+        z-index: 10;
+    }
+</style>
+
+<div class="hero-section">
+    <div class="container">
+        <h1 class="display-4">أسرع وأسهل طريقة لتبادل العملات</h1>
+        <p class="lead">أسعار صرف تنافسية، معاملات فورية، وأمان تام. ابدأ الآن.</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="calculator-card">
+                <h4 class="mb-4 text-center">حاسبة الصرف الفورية</h4>
+                <form id="public-exchange-form">
+                    {{ form.hidden_tag() }}
+                    <div class="row align-items-center">
+                        <div class="col-md-5">
+                            <div class="mb-3">
+                                {{ form.from_currency.label(class="form-label") }}
+                                {{ form.from_currency(class="form-select form-select-lg", id="from_currency") }}
+                            </div>
+                        </div>
+                        <div class="col-md-2 text-center mb-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-arrow-left-right" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M1 11.5a.5.5 0 0 0 .5.5h11.793l-3.147 3.146a.5.5 0 0 0 .708.708l4-4a.5.5 0 0 0 0-.708l-4-4a.5.5 0 0 0-.708.708L13.293 11H1.5a.5.5 0 0 0-.5.5zm14-7a.5.5 0 0 1-.5.5H2.707l3.147 3.146a.5.5 0 1 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H14.5a.5.5 0 0 1 .5.5z"/>
+                            </svg>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="mb-3">
+                                {{ form.to_currency.label(class="form-label") }}
+                                {{ form.to_currency(class="form-select form-select-lg", id="to_currency") }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        {{ form.amount.label(class="form-label") }}
+                        {{ form.amount(class="form-control form-control-lg", id="amount", placeholder="e.g., 100") }}
+                    </div>
+                    <div id="calculation-details" style="display: none;">
+                        <p class="text-center mb-1">سعر الصرف: 1 <span id="from-curr-text"></span> = <span id="rate-text"></span> <span id="to-curr-text"></span></p>
+                        <p class="text-center text-danger mb-2">رسوم المعاملة: <span id="fee-text"></span></p>
+                        <h4 class="mt-3 text-center">ستحصل على (بعد خصم الرسوم): <span id="result" class="text-success">...</span></h4>
+                    </div>
+                    <hr>
+                    <div class="d-grid">
+                         <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg">أكمل المعاملة (تسجيل الدخول)</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const fromCurrency = document.getElementById('from_currency');
+        const toCurrency = document.getElementById('to_currency');
+        const amountInput = document.getElementById('amount');
+        const resultSpan = document.getElementById('result');
+
+        function calculateExchange() {
+            const from = fromCurrency.value;
+            const to = toCurrency.value;
+            const amount = parseFloat(amountInput.value);
+
+            if (!from || !to || isNaN(amount) || amount <= 0) {
+                resultSpan.textContent = '...';
+                return;
+            }
+
+            fetch('/api/calculate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    from_currency: from,
+                    to_currency: to,
+                    amount: amount
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const detailsDiv = document.getElementById('calculation-details');
+                if (data.error) {
+                    detailsDiv.style.display = 'none';
+                } else {
+                    detailsDiv.style.display = 'block';
+                    document.getElementById('from-curr-text').textContent = from;
+                    document.getElementById('to-curr-text').textContent = to;
+                    document.getElementById('rate-text').textContent = data.rate.toFixed(4);
+                    document.getElementById('fee-text').textContent = data.fee.toFixed(4) + ' ' + to;
+                    resultSpan.textContent = data.result.toFixed(2) + ' ' + to;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                resultSpan.textContent = 'خطأ';
+            });
+        }
+
+        fromCurrency.addEventListener('change', calculateExchange);
+        toCurrency.addEventListener('change', calculateExchange);
+        amountInput.addEventListener('input', calculateExchange);
+    });
+</script>
+{% endblock %}

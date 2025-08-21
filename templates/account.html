@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">إعدادات الحساب</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <h3>أمان الحساب</h3>
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">المصادقة الثنائية (2FA)</h5>
+                {% if current_user.otp_enabled %}
+                    <p class="text-success">المصادقة الثنائية مفعلة حالياً.</p>
+                    <form action="{{ url_for('disable_2fa') }}" method="POST">
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('هل أنت متأكد من رغبتك في تعطيل المصادقة الثنائية؟')">تعطيل المصادقة الثنائية</button>
+                    </form>
+                {% else %}
+                    <p class="text-warning">المصادقة الثنائية غير مفعلة حالياً.</p>
+                    <p>عزز أمان حسابك عن طريق تفعيل المصادقة الثنائية. ستحتاج إلى تطبيق مصادقة مثل Google Authenticator.</p>
+                    <a href="{{ url_for('enable_2fa') }}" class="btn btn-primary">تفعيل المصادقة الثنائية</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

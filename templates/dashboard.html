@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1 class="mb-3">لوحة التحكم</h1>
+    <p>أهلاً بك، {{ current_user.username }}!</p>
+
+    <div class="row">
+        <div class="col-md-7">
+            <div class="card">
+                <div class="card-header">
+                    <h4>حاسبة الصرف</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('dashboard') }}" id="exchange-form">
+                        {{ form.hidden_tag() }}
+                        <div class="row">
+                            <div class="col-md-5">
+                                <div class="mb-3">
+                                    {{ form.from_currency.label(class="form-label") }}
+                                    {{ form.from_currency(class="form-select", id="from_currency") }}
+                                    <small class="form-text text-muted">
+                                        الرصيد المتاح: <span id="from_balance">...</span>
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-2 text-center align-self-center">
+                                <h2>&rarr;</h2>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="mb-3">
+                                    {{ form.to_currency.label(class="form-label") }}
+                                    {{ form.to_currency(class="form-select", id="to_currency") }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            {{ form.amount.label(class="form-label") }}
+                            {{ form.amount(class="form-control", id="amount", placeholder="e.g., 100") }}
+                        </div>
+                        <div id="calculation-details" style="display: none;">
+                            <p class="mb-1">سعر الصرف: 1 <span id="from-curr-text"></span> = <span id="rate-text"></span> <span id="to-curr-text"></span></p>
+                            <p class="text-danger mb-2">رسوم المعاملة: <span id="fee-text"></span></p>
+                            <h4 class="mt-3">ستحصل على (بعد خصم الرسوم): <span id="result" class="text-success">...</span></h4>
+                        </div>
+                        <hr>
+                        {{ form.submit(class="btn btn-primary w-100") }}
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-5">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">سجل معاملاتك</h5>
+                    <p class="card-text">عرض جميع عمليات الصرف التي قمت بها سابقاً.</p>
+                    <a href="{{ url_for('my_transactions') }}" class="btn btn-outline-secondary">عرض السجل</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const fromCurrency = document.getElementById('from_currency');
+            const toCurrency = document.getElementById('to_currency');
+            const amountInput = document.getElementById('amount');
+            const resultSpan = document.getElementById('result');
+            const fromBalanceSpan = document.getElementById('from_balance');
+
+            function updateBalance() {
+                const from = fromCurrency.value;
+                if (!from) return;
+
+                fetch(`/api/balance/${from}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        fromBalanceSpan.textContent = `${data.balance.toFixed(4)} ${from}`;
+                    });
+            }
+
+            function calculateExchange() {
+                const from = fromCurrency.value;
+                const to = toCurrency.value;
+                const amount = parseFloat(amountInput.value);
+
+                if (!from || !to || isNaN(amount) || amount <= 0) {
+                    resultSpan.textContent = '...';
+                    return;
+                }
+
+                // Use the new API endpoint
+                fetch('/api/calculate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        from_currency: from,
+                        to_currency: to,
+                        amount: amount
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                const detailsDiv = document.getElementById('calculation-details');
+                    if (data.error) {
+                    detailsDiv.style.display = 'none';
+                    } else {
+                    detailsDiv.style.display = 'block';
+                    document.getElementById('from-curr-text').textContent = from;
+                    document.getElementById('to-curr-text').textContent = to;
+                    document.getElementById('rate-text').textContent = data.rate.toFixed(4);
+                    document.getElementById('fee-text').textContent = data.fee.toFixed(4) + ' ' + to;
+                        resultSpan.textContent = data.result.toFixed(2) + ' ' + to;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    resultSpan.textContent = 'Error';
+                });
+            }
+
+            fromCurrency.addEventListener('change', () => {
+                calculateExchange();
+                updateBalance();
+            });
+            toCurrency.addEventListener('change', calculateExchange);
+            amountInput.addEventListener('input', calculateExchange);
+
+            // Initial calls on page load
+            updateBalance();
+            calculateExchange();
+        });
+    </script>
+{% endblock content %}

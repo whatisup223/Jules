@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">تعديل العملة</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <form method="POST" action="{{ url_for('edit_currency', id=form.instance.id if form.instance else '') }}">
+            {{ form.hidden_tag() }}
+            <div class="mb-3">
+                {{ form.code.label(class="form-label") }}
+                {{ form.code(class="form-control") }}
+            </div>
+            <div class="mb-3">
+                {{ form.name.label(class="form-label") }}
+                {{ form.name(class="form-control") }}
+            </div>
+            {{ form.submit(class="btn btn-primary") }}
+            <a href="{{ url_for('manage_currencies') }}" class="btn btn-secondary">إلغاء</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

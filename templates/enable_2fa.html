@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">تفعيل المصادقة الثنائية (2FA)</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <p>اتبع الخطوات التالية لتفعيل المصادقة الثنائية:</p>
+        <ol>
+            <li>
+                <strong>امسح رمز الاستجابة السريعة (QR Code)</strong><br>
+                استخدم تطبيق المصادقة الخاص بك (مثل Google Authenticator) لمسح الرمز أدناه.
+            </li>
+            <div class="my-3 text-center">
+                <img src="data:image/png;base64,{{ qr_code_data }}" alt="QR Code">
+            </div>
+            <li>
+                <strong>أدخل رمز التحقق</strong><br>
+                بعد مسح الرمز، سيظهر لك تطبيق المصادقة رمزًا مكونًا من 6 أرقام. أدخله في الحقل أدناه للتحقق وإتمام العملية.
+            </li>
+        </ol>
+
+        <form method="POST" action="">
+            {{ form.hidden_tag() }}
+            <div class="form-group mb-3">
+                {{ form.otp.label(class="form-control-label") }}
+                {{ form.otp(class="form-control form-control-lg", autocomplete="off") }}
+            </div>
+            <div class="form-group">
+                {{ form.submit(class="btn btn-primary") }}
+                <a href="{{ url_for('account') }}" class="btn btn-secondary">إلغاء</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

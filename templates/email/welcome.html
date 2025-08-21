@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Welcome!</title>
+</head>
+<body style="font-family: sans-serif; text-align: center; padding: 20px;">
+    <div style="max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px; border-radius: 5px;">
+        <h2>أهلاً بك في منصة الصرافة!</h2>
+        <p>مرحباً يا {{ user.username }},</p>
+        <p>يسعدنا انضمامك إلينا. حسابك أصبح جاهزًا للاستخدام.</p>
+        <p>يمكنك الآن تسجيل الدخول والبدء في تبادل العملات بسهولة وأمان.</p>
+        <a href="{{ url_for('login', _external=True) }}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 10px;">
+            تسجيل الدخول
+        </a>
+        <p style="margin-top: 20px; font-size: 0.9em; color: #777;">
+            إذا لم تقم أنت بإنشاء هذا الحساب، يرجى تجاهل هذه الرسالة.
+        </p>
+    </div>
+</body>
+</html>

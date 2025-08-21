@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Transaction Receipt</title>
+</head>
+<body style="font-family: sans-serif; padding: 20px;">
+    <div style="max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px; border-radius: 5px;">
+        <h2>إيصال عملية الصرف</h2>
+        <p>مرحباً يا {{ user.username }},</p>
+        <p>هذا تأكيد لعملية الصرف التي قمت بها بنجاح. إليك التفاصيل:</p>
+        <table style="width: 100%; text-align: right; border-collapse: collapse; margin-top: 20px;">
+            <tr style="border-bottom: 1px solid #ddd;">
+                <th style="padding: 8px;">المبلغ المدفوع</th>
+                <td style="padding: 8px;">{{ "%.2f"|format(transaction.amount_from) }} {{ transaction.from_currency_code }}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #ddd;">
+                <th style="padding: 8px;">المبلغ المستلم</th>
+                <td style="padding: 8px;">{{ "%.2f"|format(transaction.amount_to) }} {{ transaction.to_currency_code }}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #ddd;">
+                <th style="padding: 8px;">الرسوم</th>
+                <td style="padding: 8px;">{{ "%.2f"|format(transaction.fee) }} {{ transaction.to_currency_code }}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #ddd;">
+                <th style="padding: 8px;">التاريخ</th>
+                <td style="padding: 8px;">{{ transaction.timestamp.strftime('%Y-%m-%d %H:%M') }} UTC</td>
+            </tr>
+        </table>
+        <p style="margin-top: 20px;">شكراً لاستخدامك منصتنا!</p>
+    </div>
+</body>
+</html>

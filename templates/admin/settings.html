@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">إدارة الإعدادات العامة</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-sm btn-outline-secondary">
+            العودة إلى لوحة التحكم
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <form method="POST" action="{{ url_for('manage_settings') }}">
+            {{ form.hidden_tag() }}
+            <fieldset class="mb-4">
+                <legend>إعدادات المعاملات</legend>
+                <div class="mb-3">
+                    {{ form.fee_percent.label(class="form-label") }}
+                    <div class="input-group">
+                        {{ form.fee_percent(class="form-control") }}
+                        <span class="input-group-text">%</span>
+                    </div>
+                </div>
+            </fieldset>
+            <fieldset>
+                <legend>إعدادات أسعار الصرف الحية</legend>
+                <div class="form-check mb-3">
+                    {{ form.live_rates_enabled(class="form-check-input") }}
+                    {{ form.live_rates_enabled.label(class="form-check-label") }}
+                </div>
+                <div class="mb-3">
+                    {{ form.profit_margin_percent.label(class="form-label") }}
+                    <div class="input-group">
+                        {{ form.profit_margin_percent(class="form-control") }}
+                        <span class="input-group-text">%</span>
+                    </div>
+                    <small class="form-text text-muted">
+                        يتم تطبيق هامش الربح هذا فوق سعر الصرف الحي.
+                    </small>
+                </div>
+            </fieldset>
+            <div class="form-group mt-4">
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
